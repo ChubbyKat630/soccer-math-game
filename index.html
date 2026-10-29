@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#7ccfef">
+<title>足球算數樂園 ⚽｜幼兒數學小遊戲 v3 iPhone 修正版</title>
+<style>
+  :root { font-family: ui-rounded, "Arial Rounded MT Bold", "PingFang TC", "Noto Sans TC", system-ui, sans-serif; color: #284963; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; width: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
+  body { background: #bfeeff; -webkit-user-select: none; user-select: none; touch-action: none; }
+  button { font: inherit; cursor: pointer; touch-action: manipulation; }
+  button:focus-visible { outline: 4px solid #ffbf56; outline-offset: 3px; }
+  #game { position: fixed; inset: 0; overflow: hidden; isolation: isolate; touch-action: none; }
+  #scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .header { position: absolute; z-index: 3; top: max(12px, env(safe-area-inset-top)); left: max(18px, env(safe-area-inset-left)); right: max(18px, env(safe-area-inset-right)); display: flex; align-items: flex-start; justify-content: space-between; pointer-events: none; gap: 12px; }
+  .brand { display: flex; gap: 10px; align-items: center; padding: 10px 17px; border-radius: 24px; background: rgba(255,255,255,.86); box-shadow: 0 6px 0 rgba(73,165,183,.18); border: 3px solid rgba(255,255,255,.88); }
+  .brand-ball { font-size: clamp(25px, 3.4vw, 40px); filter: drop-shadow(0 2px 2px #0002); }
+  .brand strong { display: block; font-size: clamp(16px, 2.15vw, 25px); color: #1f668e; line-height: 1.15; letter-spacing: .03em; white-space: nowrap; }
+  .brand small { display: block; color: #528ba2; font-size: clamp(10px, 1.05vw, 13px); line-height: 1.5; font-weight: 750; }
+  .header-actions { display: flex; align-items: center; gap: 10px; pointer-events: auto; }
+  .score { display: flex; align-items: baseline; gap: 6px; border: 3px solid #fff; background: #fff7c7; color: #835520; border-radius: 23px; box-shadow: 0 5px 0 #e6c96c; padding: 8px 15px; font-weight: 900; min-width: 118px; justify-content: center; white-space: nowrap; }
+  .score .star { font-size: clamp(18px, 2.25vw, 27px); }
+  .score .score-label { font-size: clamp(14px, 1.5vw, 20px); }
+  .score #scoreNum { color: #ef792a; font-size: clamp(24px, 3.1vw, 39px); line-height: 1; min-width: 18px; text-align: center; font-variant-numeric: tabular-nums; }
+  .round-button { width: clamp(46px, 5.3vw, 64px); height: clamp(46px, 5.3vw, 64px); border-radius: 20px; border: 3px solid #fff; background: #fff; color: #347c9d; box-shadow: 0 5px 0 #a1d4e6; display: grid; place-items: center; font-size: clamp(22px, 2.6vw, 31px); transition: transform .1s; }
+  .round-button:active { transform: translateY(4px); box-shadow: 0 1px 0 #a1d4e6; }
+  .question-card { position: absolute; z-index: 2; top: 11.6%; left: 50%; transform: translateX(-50%); width: min(47%, 555px); height: 17.4%; min-height: 108px; max-height: 160px; border-radius: 34px; border: 5px solid #fff; background: #fffdf4; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 9px 0 #81b8ca, 0 18px 35px #1a759427; }
+  .question-card:before, .question-card:after { content: '✦'; position: absolute; color: #ffb84e; font-size: clamp(22px, 3vw, 32px); top: 35%; }
+  .question-card:before { left: 20px; } .question-card:after { right: 20px; color: #ff8ab2; }
+  .question-label { color: #6d9eb6; font-size: clamp(12px, 1.45vw, 18px); font-weight: 850; line-height: 1.15; }
+  #questionText { font-size: clamp(40px, 6.2vw, 84px); color: #244b70; line-height: 1.14; font-weight: 1000; letter-spacing: .045em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .instruction { position: absolute; z-index: 2; top: 31%; left: 50%; transform: translateX(-50%); padding: 5px 19px; border-radius: 20px; background: #ffffffb8; color: #397597; font-size: clamp(14px, 1.8vw, 22px); font-weight: 900; text-align: center; white-space: nowrap; text-shadow: 0 1px 0 #fff; }
+  .tip { position: absolute; z-index: 2; top: 94%; left: 50%; transform: translate(-50%, -50%); color: #2e6782; text-align: center; font-weight: 900; font-size: clamp(14px, 1.6vw, 22px); padding: 9px 20px; border-radius: 50px; border: 3px solid #fff; background: #fffdf8e8; box-shadow: 0 5px 0 #40ad9366; white-space: nowrap; pointer-events: none; transition: opacity .25s; }
+  .tip.hidden { opacity: 0; }
+  .goal { transition: filter .15s; }
+  .goal .goal-aura { opacity: 0; transition: opacity .13s; }
+  .goal.aimed .goal-aura { opacity: 1; }
+  .goal.aimed { filter: drop-shadow(0 0 10px #fff3a8); }
+  .goal.shake { animation: wobble .38s ease-in-out; transform-box: fill-box; transform-origin: center; }
+  @keyframes wobble { 0%,100%{translate: 0 0} 25%{translate:-6px 0} 60%{translate:7px 0} }
+  #ball { cursor: grab; touch-action: none; pointer-events: none; }
+  #scene * { -webkit-user-drag: none; }
+  #ball.dragging { cursor: grabbing; }
+  #ball .ball-graphic { filter: drop-shadow(0px 5px 3px #145c5b50); }
+  #aimGuideline { opacity: 0; pointer-events: none; }
+  #aimGuideline.visible { opacity: 1; }
+  .pop-layer { position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: #245f7b43; opacity: 0; pointer-events: none; transition: opacity .16s; }
+  .pop-layer.show { opacity: 1; pointer-events: auto; }
+  .pop-card { width: min(73vw, 570px); background: #fffefa; border: 6px solid #fff; border-radius: 35px; padding: 24px 28px 26px; box-shadow: 0 13px 0 #4592a8, 0 25px 40px #0f50645e; text-align: center; transform: scale(.8) translateY(15px); transition: transform .24s cubic-bezier(.2,1.5,.5,1); }
+  .show .pop-card { transform: scale(1) translateY(0); }
+  .pop-emoji { font-size: clamp(58px, 7.2vw, 90px); line-height: 1.05; }
+  .pop-title { font-size: clamp(30px, 4.1vw, 52px); font-weight: 1000; line-height: 1.3; color: #ed8751; margin-top: 10px; }
+  .pop-note { font-size: clamp(16px, 2.1vw, 25px); font-weight: 850; color: #7890a2; margin-top: 10px; }
+  .pop-layer.correct .pop-title { color: #249f75; }
+  .settings-layer { position: absolute; z-index: 11; inset: 0; background: #163a57a3; display: none; align-items: center; justify-content: center; padding: 25px; }
+  .settings-layer.show { display: flex; }
+  .settings-card { width: min(90vw, 620px); max-height: 94vh; overflow: auto; background: #fffdf6; border: 6px solid #fff; border-radius: 33px; padding: 24px 28px; box-shadow: 0 10px 0 #76b6c4; text-align: center; }
+  .settings-card h2 { font-size: clamp(24px, 3.1vw, 40px); margin: 0 0 6px; color: #2f6e90; }
+  .settings-card p { margin: 0 0 16px; color: #62899d; font-weight: 700; font-size: clamp(14px, 1.7vw, 19px); }
+  .mode-list { display: grid; gap: 10px; }
+  .mode-button { border: 3px solid #b9e0df; border-radius: 19px; padding: 12px; background: #effbf8; color: #397790; font-weight: 900; font-size: clamp(17px, 2vw, 23px); }
+  .mode-button.selected { background: #fff0a8; border-color: #ffcd57; color: #79511e; box-shadow: inset 0 -3px 0 #f7d474; }
+  .menu-footer { display: flex; margin-top: 18px; gap: 12px; }
+  .menu-footer button { flex: 1; min-height: 50px; border: 0; border-radius: 15px; font-size: clamp(16px, 1.7vw, 21px); font-weight: 950; }
+  #resetBtn { background: #f5eeee; color: #bd716f; }
+  #closeSettings { background: #61cba4; color: white; box-shadow: 0 4px 0 #34a887; }
+  .rotate-layer { display: none; position: absolute; inset: 0; z-index: 30; background: linear-gradient(#dcf5ff,#b9f1c7); align-items: center; justify-content: center; padding: 30px; text-align: center; font-weight: 950; color: #36768a; }
+  .rotate-layer .rotate-content { background: #fff; border-radius: 30px; padding: 30px 25px; box-shadow: 0 9px 0 #85d9d4; font-size: 25px; }
+  .rotate-layer .rotate-symbol { display: block; font-size: 70px; margin-bottom: 10px; }
+  .confetti { position: absolute; z-index: 8; top: 65%; left: 50%; width: 14px; height: 14px; pointer-events: none; opacity: 0; border-radius: 4px; animation: confetti-fall 1100ms ease-out forwards; }
+  @keyframes confetti-fall { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 80%{ opacity: 1; } 100% { transform: translate(var(--tx),var(--ty)) rotate(var(--rot)); opacity: 0; } }
+  @media (orientation: portrait) { .rotate-layer { display: flex; } }
+  @media (max-height: 560px) and (orientation: landscape) {
+    .brand { padding: 4px 12px; } .brand small { display: none; } .score { padding: 4px 10px; } .round-button { width: 44px; height: 44px; }
+    .question-card { top: 10%; min-height: 75px; height: 19%; } .instruction { top: 31%; }
+    .tip { padding: 5px 14px; }
+  }
+  /* v2：縮小算式，讓三個球門成為主角，也避開兩側狀態列。 */
+  .question-card { top: 8.2%; width: min(39%, 480px); height: 13%; min-height: 76px; max-height: 103px; border-radius: 26px; border-width: 4px; }
+  .question-card:before, .question-card:after { font-size: clamp(16px, 2vw, 23px); }
+  .question-card:before { left: 12px; } .question-card:after { right: 12px; }
+  .question-label { font-size: clamp(11px, 1.05vw, 15px); }
+  #questionText { font-size: clamp(34px, 4.0vw, 59px); line-height: 1.08; letter-spacing: .015em; }
+  .instruction { top: 24%; font-size: clamp(13px, 1.45vw, 19px); padding: 5px 17px; }
+  .tip { top: 96%; font-size: clamp(12px, 1.3vw, 18px); padding: 4px 14px; border-width: 2px; }
+  @media (max-height: 560px) and (orientation: landscape) {
+    .question-card { top: 8%; height: 15%; min-height: 58px; max-height: 82px; }
+    #questionText { font-size: clamp(29px, 3.7vw, 47px); }
+    .instruction { top: 25%; }
+  }
+
+  /* If scripts are disabled in iOS Quick Look, do not show a broken, empty field. */
+  #previewWarning { position: absolute; z-index: 7; top: 28%; left: 50%; transform: translateX(-50%);
+    padding: 9px 15px; width: min(78vw, 650px); border-radius: 16px; background: #fff7d2ee;
+    border: 3px solid #ffd278; text-align: center; color: #86601c; font-weight: 800;
+    font-size: clamp(11px, 1.3vw, 17px); box-shadow: 0 4px 9px #0001; pointer-events: none; }
+  .game-ready #previewWarning { display: none; }
+  @media (prefers-reduced-motion: reduce) { .goal.shake { animation: none; } .confetti { animation-duration: 1ms; } }
+</style>
+</head>
+<body>
+<div id="game">
+  <svg id="scene" viewBox="0 0 1200 800" preserveAspectRatio="none" role="img" aria-label="卡通足球場。拖動底部的足球，向有正確答案的龍門甩出去。">
+    <defs>
+      <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#83dcf8"/><stop offset="1" stop-color="#e2f9ff"/></linearGradient>
+      <linearGradient id="grass" x2="0" y2="1"><stop stop-color="#abef8a"/><stop offset="1" stop-color="#6bca88"/></linearGradient>
+      <linearGradient id="goalNet" x2="0" y2="1"><stop stop-color="#effaff" stop-opacity=".9"/><stop offset="1" stop-color="#d8f4ff" stop-opacity=".58"/></linearGradient>
+      <pattern id="netPattern" patternUnits="userSpaceOnUse" width="20" height="20"><path d="M0 0H20 M0 0V20" fill="none" stroke="#81b8cb" stroke-width="1.65" opacity=".65"/></pattern>
+      <pattern id="crowdPattern" patternUnits="userSpaceOnUse" width="58" height="30"><circle cx="9" cy="9" r="8" fill="#ffce83"/><circle cx="35" cy="13" r="9" fill="#f9a9b6"/><circle cx="56" cy="5" r="7" fill="#d1b6f5"/></pattern>
+      <filter id="softShadow"><feGaussianBlur stdDeviation="4"/></filter>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6" fill="none" stroke="#ffab4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    </defs>
+    <!-- 球場天空、彩旗、雲朵 -->
+    <rect width="1200" height="800" fill="url(#sky)"/>
+    <circle cx="1056" cy="147" r="63" fill="#fff6a7" opacity=".75"/><circle cx="1056" cy="147" r="42" fill="#ffe77a"/>
+    <g fill="#fff" opacity=".87"><ellipse cx="149" cy="156" rx="83" ry="27"/><circle cx="105" cy="140" r="31"/><circle cx="166" cy="131" r="39"/><ellipse cx="840" cy="130" rx="75" ry="22"/><circle cx="815" cy="113" r="30"/><circle cx="855" cy="113" r="31"/></g>
+    <path d="M0 285Q600 304 1200 285" fill="none" stroke="#fff8d4" stroke-width="4"/>
+    <g id="flags">
+      <path d="M0 284 l25 0 -12 30z M80 287 l25 0 -12 31z M160 292 l25 0 -12 31z M240 295 l25 0 -12 31z M320 299 l25 0 -12 31z M400 300 l25 0 -12 31z M480 301 l25 0 -12 31z M560 302 l25 0 -12 31z M640 302 l25 0 -12 31z M720 301 l25 0 -12 31z M800 299 l25 0 -12 31z M880 295 l25 0 -12 31z M960 291 l25 0 -12 31z M1040 287 l25 0 -12 31z M1120 284 l25 0 -12 31z" fill="#ffbe6c" opacity=".7"/>
+    </g>
+    <path d="M0 326Q600 305 1200 326L1200 408L0 408Z" fill="#92dace"/>
+    <path d="M0 335Q600 315 1200 335L1200 381L0 381Z" fill="url(#crowdPattern)" opacity=".7"/>
+    <path d="M0 371Q600 360 1200 371" fill="none" stroke="#fff6e8" stroke-width="12"/>
+    <!-- 足球草坪 -->
+    <path d="M0 374Q600 358 1200 374L1200 800L0 800Z" fill="url(#grass)"/>
+    <path d="M0 560Q600 540 1200 560L1200 634Q600 620 0 634Z" fill="#bff2a4" opacity=".42"/>
+    <path d="M0 700Q600 676 1200 700L1200 800L0 800Z" fill="#56ba84" opacity=".12"/>
+    <path d="M-40 747Q600 718 1240 747" fill="none" stroke="#ebfff6" stroke-width="7" opacity=".6"/>
+    <path d="M455 800 Q390 610 600 596 Q805 610 745 800" fill="none" stroke="#e8fff1" stroke-width="6" opacity=".44"/>
+    <g fill="#fffac9" opacity=".94"><circle cx="90" cy="557" r="4"/><circle cx="1114" cy="605" r="5"/><circle cx="150" cy="699" r="4"/><circle cx="1045" cy="722" r="5"/><circle cx="304" cy="612" r="3"/><circle cx="877" cy="645" r="4"/></g>
+    <g fill="none" stroke="#e8fff6" stroke-width="3" stroke-linecap="round" opacity=".8"><path d="M85 666l-8 -17m8 17 11-16 M234 732l-9 -15m9 15 11-14 M983 678l-10 -14m10 14 9-17 M1116 765l-7 -15m7 15 12-14"/></g>
+    <!-- 左邊小兔球迷 -->
+    <g transform="translate(86 453)">
+      <ellipse cx="0" cy="104" rx="61" ry="17" fill="#238a73" opacity=".17"/>
+      <ellipse cx="-27" cy="-52" rx="16" ry="56" fill="#fff7f5" stroke="#edc7d3" stroke-width="4" transform="rotate(-13 -27 -52)"/>
+      <ellipse cx="22" cy="-54" rx="16" ry="57" fill="#fff7f5" stroke="#edc7d3" stroke-width="4" transform="rotate(12 22 -54)"/>
+      <ellipse cx="-27" cy="-52" rx="7" ry="38" fill="#f8b8c8" transform="rotate(-13 -27 -52)"/>
+      <ellipse cx="22" cy="-54" rx="7" ry="38" fill="#f8b8c8" transform="rotate(12 22 -54)"/>
+      <ellipse cy="77" rx="36" ry="35" fill="#fff8f4" stroke="#e9d3d5" stroke-width="4"/>
+      <circle cy="-4" r="57" fill="#fffaf7" stroke="#e9d3d5" stroke-width="4"/>
+      <circle cx="-21" cy="-9" r="5.6" fill="#38556c"/><circle cx="21" cy="-9" r="5.6" fill="#38556c"/>
+      <circle cx="-35" cy="9" r="11" fill="#f6c4c9" opacity=".8"/><circle cx="35" cy="9" r="11" fill="#f6c4c9" opacity=".8"/>
+      <ellipse cy="13" rx="7" ry="5" fill="#f2a9b6"/><path d="M-8 20Q0 30 8 20" fill="none" stroke="#7d637a" stroke-width="3" stroke-linecap="round"/>
+      <path d="M-16 65 L0 78 L16 65L18 86L0 83L-18 86Z" fill="#fda9b0"/>
+      <path d="M-29 73L-51 54 M29 73L49 54" stroke="#fff8f4" stroke-width="14" stroke-linecap="round"/>
+    </g>
+    <!-- 右邊小雞球迷 -->
+    <g transform="translate(1114 461)">
+      <ellipse cx="0" cy="93" rx="58" ry="15" fill="#238a73" opacity=".16"/>
+      <ellipse cy="54" rx="44" ry="48" fill="#ffdf68" stroke="#ecb747" stroke-width="4"/>
+      <circle cy="-8" r="54" fill="#ffe37c" stroke="#ecb747" stroke-width="4"/>
+      <path d="M-15-60Q-17-94 2-80Q25-92 20-59" fill="#ffc96c" stroke="#eab45f" stroke-width="3"/>
+      <circle cx="-21" cy="-10" r="6" fill="#364759"/><circle cx="21" cy="-10" r="6" fill="#364759"/>
+      <circle cx="-35" cy="7" r="10" fill="#ffa5a8" opacity=".7"/><circle cx="35" cy="7" r="10" fill="#ffa5a8" opacity=".7"/>
+      <path d="M-12 12L0 26L12 12Z" fill="#ec9b48"/><path d="M-29 53L-55 39M29 53L54 40" stroke="#ffe37c" stroke-width="15" stroke-linecap="round"/>
+      <path d="M-17 99v13m34-13v13" stroke="#eea34c" stroke-width="8" stroke-linecap="round"/>
+    </g>
+    <g id="goals">
+<g class="goal" data-index="0" transform="translate(130 330)">
+        <ellipse cx="130" cy="209" rx="121" ry="17" fill="#287f5d" opacity=".25"/>
+        <rect class="goal-aura" x="-6" y="38" width="272" height="183" rx="28" fill="#fff8a5" opacity=".6"/>
+        <path d="M29 65H231L249 204H11Z" fill="url(#goalNet)"/>
+        <path d="M29 65H231L249 204H11Z" fill="url(#netPattern)"/>
+        <path d="M29 65H231L249 204H11Z" fill="none" stroke="#4c94ab" stroke-opacity=".45" stroke-width="5"/>
+        <path d="M22 201V69Q22 58 34 58H226Q238 58 238 69V201" fill="none" stroke="#6dabc1" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" opacity=".34"/>
+        <path d="M22 201V69Q22 58 34 58H226Q238 58 238 69V201" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 71H238" stroke="#d6f3ff" stroke-width="4"/>
+        <g>
+          <rect x="29" y="-32" width="202" height="79" rx="22" fill="#ef7c9b" transform="translate(0 6)"/>
+          <rect x="29" y="-32" width="202" height="74" rx="22" fill="#ffb9cb" stroke="#fff" stroke-width="5"/>
+          <path d="M47-17H210" stroke="#ffe3ea" stroke-width="7" opacity=".8" stroke-linecap="round"/>
+          <circle cx="49" cy="6" r="5" fill="#fff" opacity=".6"/>
+          <circle cx="211" cy="6" r="5" fill="#fff" opacity=".6"/>
+          <text class="goal-number" x="130" y="24" text-anchor="middle" dominant-baseline="middle" font-family="ui-rounded, Arial Rounded MT Bold, PingFang TC, sans-serif" font-size="67" font-weight="900" fill="#244d70" stroke="#fff" stroke-width="2.5" paint-order="stroke">2</text>
+        </g>
+        <g transform="translate(5 208)" fill="#ffe3ea"><circle r="6"/><circle cx="249" r="6"/></g>
+      </g>
+<g class="goal" data-index="1" transform="translate(470 330)">
+        <ellipse cx="130" cy="209" rx="121" ry="17" fill="#287f5d" opacity=".25"/>
+        <rect class="goal-aura" x="-6" y="38" width="272" height="183" rx="28" fill="#fff8a5" opacity=".6"/>
+        <path d="M29 65H231L249 204H11Z" fill="url(#goalNet)"/>
+        <path d="M29 65H231L249 204H11Z" fill="url(#netPattern)"/>
+        <path d="M29 65H231L249 204H11Z" fill="none" stroke="#4c94ab" stroke-opacity=".45" stroke-width="5"/>
+        <path d="M22 201V69Q22 58 34 58H226Q238 58 238 69V201" fill="none" stroke="#6dabc1" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" opacity=".34"/>
+        <path d="M22 201V69Q22 58 34 58H226Q238 58 238 69V201" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 71H238" stroke="#d6f3ff" stroke-width="4"/>
+        <g>
+          <rect x="29" y="-32" width="202" height="79" rx="22" fill="#eba752" transform="translate(0 6)"/>
+          <rect x="29" y="-32" width="202" height="74" rx="22" fill="#ffe08b" stroke="#fff" stroke-width="5"/>
+          <path d="M47-17H210" stroke="#fff2bc" stroke-width="7" opacity=".8" stroke-linecap="round"/>
+          <circle cx="49" cy="6" r="5" fill="#fff" opacity=".6"/>
+          <circle cx="211" cy="6" r="5" fill="#fff" opacity=".6"/>
+          <text class="goal-number" x="130" y="24" text-anchor="middle" dominant-baseline="middle" font-family="ui-rounded, Arial Rounded MT Bold, PingFang TC, sans-serif" font-size="67" font-weight="900" fill="#244d70" stroke="#fff" stroke-width="2.5" paint-order="stroke">5</text>
+        </g>
+        <g transform="translate(5 208)" fill="#fff2bc"><circle r="6"/><circle cx="249" r="6"/></g>
+      </g>
+<g class="goal" data-index="2" transform="translate(810 330)">
+        <ellipse cx="130" cy="209" rx="121" ry="17" fill="#287f5d" opacity=".25"/>
+        <rect class="goal-aura" x="-6" y="38" width="272" height="183" rx="28" fill="#fff8a5" opacity=".6"/>
+        <path d="M29 65H231L249 204H11Z" fill="url(#goalNet)"/>
+        <path d="M29 65H231L249 204H11Z" fill="url(#netPattern)"/>
+        <path d="M29 65H231L249 204H11Z" fill="none" stroke="#4c94ab" stroke-opacity=".45" stroke-width="5"/>
+        <path d="M22 201V69Q22 58 34 58H226Q238 58 238 69V201" fill="none" stroke="#6dabc1" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" opacity=".34"/>
+        <path d="M22 201V69Q22 58 34 58H226Q238 58 238 69V201" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 71H238" stroke="#d6f3ff" stroke-width="4"/>
+        <g>
+          <rect x="29" y="-32" width="202" height="79" rx="22" fill="#69b8e6" transform="translate(0 6)"/>
+          <rect x="29" y="-32" width="202" height="74" rx="22" fill="#a9dbff" stroke="#fff" stroke-width="5"/>
+          <path d="M47-17H210" stroke="#e1f4ff" stroke-width="7" opacity=".8" stroke-linecap="round"/>
+          <circle cx="49" cy="6" r="5" fill="#fff" opacity=".6"/>
+          <circle cx="211" cy="6" r="5" fill="#fff" opacity=".6"/>
+          <text class="goal-number" x="130" y="24" text-anchor="middle" dominant-baseline="middle" font-family="ui-rounded, Arial Rounded MT Bold, PingFang TC, sans-serif" font-size="67" font-weight="900" fill="#244d70" stroke="#fff" stroke-width="2.5" paint-order="stroke">8</text>
+        </g>
+        <g transform="translate(5 208)" fill="#e1f4ff"><circle r="6"/><circle cx="249" r="6"/></g>
+      </g>
+    </g>
+    <!-- 射門指示線 -->
+    <g id="aimGuideline"><line id="aimLine" x1="600" y1="665" x2="600" y2="525" stroke="#fff" stroke-opacity=".95" stroke-width="11" stroke-dasharray="14 12" stroke-linecap="round"/><line id="aimArrow" x1="600" y1="665" x2="600" y2="525" stroke="#ffb24c" stroke-width="5" stroke-dasharray="14 12" stroke-linecap="round" marker-end="url(#arrowhead)"/></g>
+    <!-- 足球陰影與足球本體 -->
+    <ellipse id="ballShadow" cx="600" cy="704" rx="41" ry="13" fill="#27794b" opacity=".32" filter="url(#softShadow)"/>
+    <g id="ball" transform="translate(600 665)" role="button" aria-label="按住足球拖到龍門，或向龍門劃線射門" tabindex="0">
+      <g id="ballArtwork" class="ball-graphic">
+        <circle r="44" fill="#fffefa" stroke="#2b5268" stroke-width="3.4"/>
+        <circle r="40.5" fill="none" stroke="#d8e7ed" stroke-width="1.5"/>
+        <!-- 五片小外邊皮革與中央五角形，保持足球清楚可辨。 -->
+        <g fill="#334d5d" stroke="#263f51" stroke-width="1">
+          <path d="M-10-37L5-40L18-32L15-22L1-20L-10-26Z"/>
+          <path d="M-10-37L5-40L18-32L15-22L1-20L-10-26Z" transform="rotate(72)"/>
+          <path d="M-10-37L5-40L18-32L15-22L1-20L-10-26Z" transform="rotate(144)"/>
+          <path d="M-10-37L5-40L18-32L15-22L1-20L-10-26Z" transform="rotate(216)"/>
+          <path d="M-10-37L5-40L18-32L15-22L1-20L-10-26Z" transform="rotate(288)"/>
+          <path d="M0-18L17-6L11 13L-11 13L-17-6Z"/>
+        </g>
+        <path d="M0-18L1-25M17-6L24-8M11 13L16 20M-11 13L-16 20M-17-6L-24-8" stroke="#b8cbd4" stroke-width="2.5" fill="none"/>
+        <ellipse cx="-20" cy="-25" rx="11" ry="5" fill="white" opacity=".7" transform="rotate(-35 -20 -25)"/>
+      </g>
+      <circle r="65" fill="transparent" stroke="none"/>
+    </g>
+  </svg>
+
+  <header class="header">
+    <div class="brand"><span class="brand-ball">⚽</span><div><strong>足球算數樂園</strong><small>小小球星，一起學數學！</small></div></div>
+    <div class="header-actions">
+      <div class="score" aria-label="答對題數"><span class="star">⭐</span><span class="score-label">答對</span><strong id="scoreNum">0</strong><span class="score-label">題</span></div>
+      <button type="button" class="round-button" id="soundBtn" aria-label="關閉音效" title="音效開關">🔊</button>
+      <button type="button" class="round-button" id="settingsBtn" aria-label="遊戲設定" title="遊戲設定">⚙️</button>
+    </div>
+  </header>
+  <div class="question-card" aria-live="polite">
+    <div class="question-label" id="questionLabel">第 1 題・選出正確答案</div>
+    <div id="questionText">1 + 4 = ?</div>
+  </div>
+  <div class="instruction">🎯 將足球拖入球門，或劃向球門射球！</div>
+  <div id="tip" class="tip">👆 拖球到龍門，或向上劃線射門！</div>
+
+
+  <div id="previewWarning" role="status">⚠️ 目前可能是 iPhone「檔案預覽」，遊戲未能啟動。請將 HTML 放到網站，以 <strong>Safari 網址</strong>開啟才可互動。</div>
+  <div id="feedback" class="pop-layer" aria-live="assertive" aria-atomic="true">
+    <div class="pop-card"><div class="pop-emoji" id="feedbackEmoji">🌟</div><div class="pop-title" id="feedbackTitle">太棒了！你答對了！</div><div class="pop-note" id="feedbackNote">下一題準備好了！</div></div>
+  </div>
+  <div class="settings-layer" id="settingsLayer" role="dialog" aria-modal="true" aria-label="難度設定">
+    <div class="settings-card"><h2>⚙️ 遊戲設定</h2><p>選一個適合小朋友的算術難度</p>
+      <div class="mode-list">
+        <button class="mode-button" type="button" data-mode="easy">🐣 5 以內加法・初學者</button>
+        <button class="mode-button selected" type="button" data-mode="add">⚽ 10 以內加法・小球星</button>
+        <button class="mode-button" type="button" data-mode="mix">🏆 10 以內加減法・挑戰賽</button>
+      </div>
+      <div class="menu-footer"><button id="resetBtn" type="button">🔄 重新開始</button><button id="closeSettings" type="button">▶ 繼續遊戲</button></div>
+    </div>
+  </div>
+  <div class="rotate-layer"><div class="rotate-content"><span class="rotate-symbol">📱 ↪️</span>請將 iPad 橫向拿著<br><span style="font-size:18px;color:#6c9ca7">橫向畫面更容易射門！⚽</span></div></div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg';
+  const scene = document.getElementById('scene');
+  const goalsRoot = document.getElementById('goals');
+  const ball = document.getElementById('ball');
+  const artwork = document.getElementById('ballArtwork');
+  const shadow = document.getElementById('ballShadow');
+  const aimGuide = document.getElementById('aimGuideline');
+  const aimLine = document.getElementById('aimLine');
+  const aimArrow = document.getElementById('aimArrow');
+  const feedback = document.getElementById('feedback');
+  const settingsLayer = document.getElementById('settingsLayer');
+  const soundBtn = document.getElementById('soundBtn');
+  const modeButtons = [...document.querySelectorAll('[data-mode]')];
+  const START = {x:600, y:665};
+  const GOAL_Y = 532;
+  const goalCenters = [260, 600, 940];
+  const goalColors = [
+    {sign:'#ffb9cb', rim:'#ef7c9b', light:'#ffe3ea'},
+    {sign:'#ffe08b', rim:'#eba752', light:'#fff2bc'},
+    {sign:'#a9dbff', rim:'#69b8e6', light:'#e1f4ff'}
+  ];
+  let mode = 'add', deck = [], question = null, score = 0, questionNumber = 0;
+  let correctGoal = 1, lastCorrectGoal = -1, lastTwoGoal = -1;
+  let state = 'ready', pos = {...START}, drag = null, flightId = null, timeoutId = null, lastFrame = 0;
+  let soundOn = true, audioCtx = null, spin = 0, tipDismissed = false, ballScale = 1;
+
+  // All goal SVG is included in the document from the start.
+  // This fixes iOS viewers that do not support dynamic innerHTML on SVG groups.
+  const goalEls = Array.prototype.slice.call(goalsRoot.querySelectorAll('.goal'));
+  if (goalEls.length !== 3) throw new Error('Goal markup not found');
+
+  const rand = (n) => Math.floor(Math.random() * n);
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) { const j = rand(i + 1); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+    return arr;
+  }
+  function buildDeck() {
+    const tasks = [];
+    const max = mode === 'easy' ? 5 : 10;
+    for (let a = 1; a <= max; a++) {
+      for (let b = 1; b <= max - a; b++) tasks.push({a, b, op:'+', answer:a+b});
+    }
+    // 5 以內只用 1～5 的加法；10 以內亦沒有超過 10 的答案
+    if (mode === 'mix') {
+      for (let a = 2; a <= 10; a++) {
+        for (let b = 1; b <= a; b++) tasks.push({a, b, op:'−', answer:a-b});
+      }
+    }
+    shuffle(tasks);
+    // 防止下一輪剛好重覆上一題。
+    if (question && tasks.length > 1 && sameTask(tasks[tasks.length-1],question)) {
+      [tasks[0], tasks[tasks.length-1]] = [tasks[tasks.length-1], tasks[0]];
+    }
+    return tasks;
+  }
+  function sameTask(a,b) { return a && b && a.a===b.a && a.b===b.b && a.op===b.op; }
+  function buildOptions(answer) {
+    const limit = mode === 'easy' ? 5 : 10;
+    const near = shuffle([-2,-1,1,2,-3,3]).map(d => answer+d).filter(n => n>=0 && n<=limit && n!==answer);
+    const wrong = [];
+    for (const n of near) { if (!wrong.includes(n)) wrong.push(n); if (wrong.length === 2) break; }
+    if (wrong.length < 2) { for (let n = 0; n<=limit; n++) { if (n!==answer && !wrong.includes(n)) wrong.push(n); if (wrong.length === 2) break; } }
+    let idx = rand(3);
+    if (lastCorrectGoal === idx && lastTwoGoal === idx) idx = (idx + 1 + rand(2)) % 3;
+    lastTwoGoal = lastCorrectGoal; lastCorrectGoal = idx;
+    const options = [...wrong]; options.splice(idx, 0, answer);
+    return {options, idx};
+  }
+  function nextQuestion() {
+    if (!deck.length) deck = buildDeck();
+    question = deck.pop();
+    questionNumber += 1;
+    document.getElementById('questionLabel').textContent = `第 ${questionNumber} 題・選出正確答案`;
+    document.getElementById('questionText').textContent = `${question.a} ${question.op} ${question.b} = ?`;
+    const {options, idx} = buildOptions(question.answer);
+    correctGoal = idx;
+    goalEls.forEach((g,i) => { g.querySelector('.goal-number').textContent = options[i]; g.dataset.answer = String(options[i]); g.classList.remove('aimed','shake'); });
+    resetBall();
+    state = 'ready';
+  }
+  function updateBall(x,y,scale=1) {
+    pos.x = x; pos.y = y; ballScale = scale;
+    // 背景按螢幕尺寸鋪滿，但足球必須保持 1:1 的正圓比例。
+    const r = scene.getBoundingClientRect();
+    const sy = r.height / 800;
+    const circleXCorrection = r.width && r.height ? sy / (r.width/1200) : 1;
+    // 手機橫向時依然要看得清楚足球：畫面高度較矮會稍為放大。
+    const visualScale = scale * (sy > 0 ? Math.max(1,30/(44*sy)) : 1);
+    ball.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${visualScale.toFixed(3)})`);
+    artwork.setAttribute('transform', `scale(${circleXCorrection.toFixed(5)} 1) rotate(${spin.toFixed(1)})`);
+    shadow.setAttribute('cx', String(x));
+    shadow.setAttribute('cy', String(Math.min(726, y+39)));
+    shadow.setAttribute('rx', String(44 * circleXCorrection * visualScale));
+    shadow.setAttribute('opacity', String(state === 'flying' ? .15 : .32));
+  }
+  function resetBall() {
+    cancelAnimationFrame(flightId); flightId = null;
+    spin = 0; drag = null;
+    ball.classList.remove('dragging');
+    aimGuide.classList.remove('visible');
+    goalEls.forEach(g => g.classList.remove('aimed','shake'));
+    updateBall(START.x,START.y,1);
+  }
+  function svgPoint(e) {
+    const p = scene.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    const m = scene.getScreenCTM();
+    if (!m) return {...START};
+    const out = p.matrixTransform(m.inverse()); return {x:out.x,y:out.y};
+  }
+  function clamp(v,min,max) { return Math.min(max,Math.max(min,v)); }
+  // 對孩子來說，龍門內任何位置放開也應該算射中。
+  function goalAt(x, y) {
+    if (y < 345 || y > GOAL_Y + 16) return -1;
+    return goalCenters.findIndex(cx => Math.abs(x - cx) <= 145);
+  }
+  function aimFor(dx, dy) {
+    if (dy >= -8) return {index:-1, x: START.x};
+    const targetX = START.x + (GOAL_Y - START.y) * dx / dy;
+    const index = goalCenters.findIndex(cx => Math.abs(targetX - cx) <= 153);
+    return {x:targetX, index};
+  }
+  function highlight(index) { goalEls.forEach((g,i)=>g.classList.toggle('aimed',index===i)); }
+  function updateAim() {
+    if (!drag) return;
+    const dx = pos.x - drag.startX, dy = pos.y - drag.startY;
+    const directlyOverGoal = goalAt(pos.x,pos.y);
+    if (directlyOverGoal !== -1) {
+      highlight(directlyOverGoal);
+      aimGuide.classList.remove('visible');
+      return;
+    }
+    if (Math.hypot(dx,dy)<12 || dy>=-8) { aimGuide.classList.remove('visible'); highlight(-1); return; }
+    const aim = aimFor(dx,dy);
+    const x2 = clamp(aim.x,-200,1400);
+    for (const line of [aimLine,aimArrow]) {
+      line.setAttribute('x1',String(pos.x));line.setAttribute('y1',String(pos.y));
+      line.setAttribute('x2',String(x2));line.setAttribute('y2',String(GOAL_Y));
+    }
+    aimGuide.classList.add('visible'); highlight(aim.index);
+  }
+  function beginDrag(e) {
+    if (state!=='ready' || settingsLayer.classList.contains('show')) return;
+    if (e.button !== undefined && e.button !== 0) return;
+    const p=svgPoint(e);
+    // 用手指點球時給予更大觸控範圍，避免必須精確觸碰小足球。
+    const screen=scene.getBoundingClientRect();
+    if (Math.hypot((p.x-pos.x)*screen.width/1200,(p.y-pos.y)*screen.height/800)>82) return;
+    if (e.preventDefault) e.preventDefault();
+    state='dragging';
+    drag={id:e.pointerId,px:p.x,py:p.y,startX:pos.x,startY:pos.y};
+    ball.classList.add('dragging');
+    // 將捕捉設於 HTML div 而不是 SVG g；Android Chrome 上更穩定。
+    if (e.pointerId !== undefined) {
+      try { document.getElementById('game').setPointerCapture(e.pointerId); } catch (_) {}
+    }
+    if (!tipDismissed) {tipDismissed=true;document.getElementById('tip').classList.add('hidden');}
+    if (soundOn) initAudio();
+  }
+  function moveDrag(e) {
+    if(state!=='dragging'||!drag||drag.id!==e.pointerId) return;
+    if (e.preventDefault) e.preventDefault();
+    const p=svgPoint(e);
+    const x=clamp(drag.startX+p.x-drag.px,44,1156);
+    const y=clamp(drag.startY+p.y-drag.py,335,742);
+    updateBall(x,y);updateAim();
+  }
+  function endDrag(e) {
+    if(state!=='dragging'||!drag||drag.id!==e.pointerId) return;
+    if (e.preventDefault) e.preventDefault();
+    // 快速甩手也要取得手指放開前的最新位置。
+    if(e.type!=='pointercancel' && e.type!=='touchcancel') moveDrag(e);
+    const d=drag;
+    ball.classList.remove('dragging');aimGuide.classList.remove('visible');highlight(-1);
+    drag=null;
+    try {
+      const game=document.getElementById('game');
+      if(e.pointerId!==undefined && game.hasPointerCapture(e.pointerId))game.releasePointerCapture(e.pointerId);
+    } catch (_) {}
+    if(e.type==='pointercancel'||e.type==='touchcancel'){resetBall();state='ready';return;}
+    const dx=pos.x-d.startX,dy=pos.y-d.startY;
+    const len=Math.hypot(dx,dy);
+    if(len<14){resetBall();state='ready';showTip('👆 拖住足球，移到龍門再放手！');return;}
+    const direct=goalAt(pos.x,pos.y);
+    if(direct>=0){goalHit(direct);return;}
+    if(pos.y<=GOAL_Y){missGoal();return;}
+    if(dy>=-8){resetBall();state='ready';showTip('👆 向上面三個龍門劃線射門！');return;}
+    // 不要求快甩：慢慢拖動再放手也會沿繪畫出的路線射出。
+    const dirX=dx/len,dirY=dy/len;
+    state='flying';lastFrame=performance.now();
+    const startedAt=lastFrame,speed=960;
+    const fly=now=>{
+      if(state!=='flying')return;
+      const dt=Math.min((now-lastFrame)/1000,.045);lastFrame=now;
+      const oldY=pos.y,oldX=pos.x;
+      spin+=dt*650;
+      const newX=oldX+dirX*speed*dt,newY=oldY+dirY*speed*dt;
+      const scale=clamp(1-(START.y-newY)*.0006,.76,1.12);
+      updateBall(newX,newY,scale);
+      if(oldY>GOAL_Y && newY<=GOAL_Y){
+        const t=(GOAL_Y-oldY)/(newY-oldY);
+        const impactX=oldX+(newX-oldX)*t;
+        const idx=goalCenters.findIndex(cx=>Math.abs(impactX-cx)<=153);
+        if(idx>=0){updateBall(impactX,GOAL_Y,.86);goalHit(idx);return;}
+      }
+      if(newY<330||newY>835||newX<-80||newX>1280||now-startedAt>1800){missGoal();return;}
+      flightId=requestAnimationFrame(fly);
+    };
+    flightId=requestAnimationFrame(fly);
+  }
+  function showTip(message) {
+    const tip=document.getElementById('tip'); tip.textContent=message;tip.classList.remove('hidden');
+    clearTimeout(tip._timer); tip._timer=setTimeout(()=>tip.classList.add('hidden'),2400);
+  }
+  function initAudio() {
+    try { if(!audioCtx){const AC=window.AudioContext||window.webkitAudioContext;if(AC)audioCtx=new AC();} if(audioCtx && audioCtx.state==='suspended')audioCtx.resume(); } catch(_) { audioCtx=null; }
+  }
+  function note(freq,duration=0.14,delay=0,type='sine') {
+    if(!soundOn)return;
+    try {
+      initAudio(); if(!audioCtx)return;
+      const t=audioCtx.currentTime+delay;
+      const oscillator=audioCtx.createOscillator(),gain=audioCtx.createGain();
+      oscillator.type=type;oscillator.frequency.setValueAtTime(freq,t);
+      gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.065,t+.02);
+      gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
+      oscillator.connect(gain).connect(audioCtx.destination);oscillator.start(t);oscillator.stop(t+duration+.02);
+    } catch(_) {}
+  }
+  function playSound(kind) {
+    if(kind==='correct'){note(523,.18,0,'sine');note(659,.18,.12,'sine');note(784,.35,.24,'sine');}
+    if(kind==='wrong'){note(392,.17,0,'sine');note(330,.27,.17,'sine');}
+    if(kind==='miss'){note(400,.11,0,'triangle');}
+  }
+  function confettiBurst(index) {
+    const colors=['#fff08d','#ff98af','#8ddef6','#fff','#b7f7a1','#f5baff'];
+    const originX=goalCenters[index]/1200*window.innerWidth, originY=520/800*window.innerHeight;
+    for(let i=0;i<30;i++) {
+      const c=document.createElement('span'); c.className='confetti'; c.style.left=`${originX}px`;c.style.top=`${originY}px`;
+      c.style.background=colors[rand(colors.length)];c.style.width=`${7+rand(10)}px`;c.style.height=`${7+rand(10)}px`;
+      c.style.setProperty('--tx',`${rand(550)-275}px`);c.style.setProperty('--ty',`${rand(430)-250}px`);c.style.setProperty('--rot',`${rand(720)-360}deg`);
+      document.getElementById('game').appendChild(c);setTimeout(()=>c.remove(),1300);
+    }
+  }
+  function showFeedback(kind,emoji,title,noteText,delay,nextFn) {
+    clearTimeout(timeoutId);
+    state='feedback';
+    feedback.className=`pop-layer ${kind}`;
+    document.getElementById('feedbackEmoji').textContent=emoji;
+    document.getElementById('feedbackTitle').textContent=title;
+    document.getElementById('feedbackNote').textContent=noteText;
+    requestAnimationFrame(()=>feedback.classList.add('show'));
+    timeoutId=setTimeout(()=>{feedback.classList.remove('show');nextFn();},delay);
+  }
+  function goalHit(index) {
+    cancelAnimationFrame(flightId); flightId=null;
+    goalEls[index].classList.add('shake');
+    if(index===correctGoal) {
+      score+=1;
+      document.getElementById('scoreNum').textContent=score;
+      playSound('correct');confettiBurst(index);
+      showFeedback('correct','🎉','太棒了！你答對了！',`好球！已經答對 ${score} 題 ⭐`,1450, nextQuestion);
+    } else {
+      playSound('wrong');
+      showFeedback('wrong','💗','差一點！再試試吧❤️','再看看算式，這題還有機會！',1500,()=>{resetBall();state='ready';});
+    }
+  }
+  function missGoal() {
+    cancelAnimationFrame(flightId);flightId=null;
+    playSound('miss');
+    showFeedback('miss','⚽','再射一次！','瞄準龍門，向上甩球～',1150,()=>{resetBall();state='ready';});
+  }
+  function pauseForMenu() {
+    clearTimeout(timeoutId);feedback.classList.remove('show');resetBall();state='paused';
+    settingsLayer.classList.add('show');
+  }
+  function resumeFromMenu() { settingsLayer.classList.remove('show');state='ready';resetBall(); }
+  function restartGame() { clearTimeout(timeoutId);feedback.classList.remove('show'); score=0;questionNumber=0;document.getElementById('scoreNum').textContent='0';deck=[];lastCorrectGoal=-1;lastTwoGoal=-1;nextQuestion(); }
+  // On iOS, native touch events are more reliable for drawing while touching SVG.
+  const isAppleTouch = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (window.PointerEvent && !isAppleTouch) {
+    scene.addEventListener('pointerdown',beginDrag,{passive:false});
+    const game=document.getElementById('game');
+    game.addEventListener('pointermove',moveDrag,{passive:false});
+    game.addEventListener('pointerup',endDrag,{passive:false});
+    game.addEventListener('pointercancel',endDrag,{passive:false});
+  } else {
+    // 舊版 iPad Safari 後備：原生 touch 事件，避免觸控被當成捲頁。
+    let touchId=null;
+    const wrapTouch=(touch,type)=>({clientX:touch.clientX,clientY:touch.clientY,pointerId:touch.identifier,type,preventDefault:()=>{}});
+    scene.addEventListener('touchstart',e=>{
+      if(touchId!==null)return;
+      const touch=e.changedTouches[0];if(!touch)return;
+      beginDrag(wrapTouch(touch,'touchstart'));
+      if(state==='dragging'){touchId=touch.identifier;e.preventDefault();}
+    },{passive:false});
+    const activeTouch=(e)=>Array.from(e.changedTouches).find(t=>t.identifier===touchId);
+    window.addEventListener('touchmove',e=>{if(touchId===null)return;const t=activeTouch(e);if(t){e.preventDefault();moveDrag(wrapTouch(t,'touchmove'));}},{passive:false});
+    window.addEventListener('touchend',e=>{if(touchId===null)return;const t=activeTouch(e);if(t){e.preventDefault();endDrag(wrapTouch(t,'touchend'));touchId=null;}},{passive:false});
+    window.addEventListener('touchcancel',e=>{if(touchId===null)return;const t=activeTouch(e);if(t){endDrag(wrapTouch(t,'touchcancel'));touchId=null;}},{passive:false});
+    scene.addEventListener('mousedown',beginDrag);
+    window.addEventListener('mousemove',moveDrag);
+    window.addEventListener('mouseup',endDrag);
+  }
+  window.addEventListener('resize',()=>updateBall(pos.x,pos.y,ballScale));
+  ball.addEventListener('keydown',e=>{
+    // 鍵盤使用者可透過箭嘴選擇方向，再用 Enter 射球。
+    if(state!=='ready')return;
+    if(['ArrowLeft','ArrowRight','ArrowUp','Enter',' '].includes(e.key)){
+      e.preventDefault();
+      let selected=Number(ball.dataset.keyboardGoal || '1');
+      if(e.key==='ArrowLeft')selected=Math.max(0,selected-1);
+      if(e.key==='ArrowRight')selected=Math.min(2,selected+1);
+      ball.dataset.keyboardGoal=String(selected);highlight(selected);
+      if(e.key==='Enter'||e.key===' '){highlight(-1);goalHit(selected);}
+    }
+  });
+  document.getElementById('settingsBtn').addEventListener('click',pauseForMenu);
+  document.getElementById('closeSettings').addEventListener('click',resumeFromMenu);
+  document.getElementById('resetBtn').addEventListener('click',()=>{restartGame();resumeFromMenu();});
+  modeButtons.forEach(button=>button.addEventListener('click',()=>{
+    if(mode!==button.dataset.mode) {mode=button.dataset.mode;modeButtons.forEach(b=>b.classList.toggle('selected',b===button));restartGame();}
+    resumeFromMenu();
+  }));
+  soundBtn.addEventListener('click',()=>{soundOn=!soundOn;soundBtn.textContent=soundOn?'🔊':'🔇';soundBtn.setAttribute('aria-label',soundOn?'關閉音效':'開啟音效');if(soundOn)note(587,.12);});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='dragging'){resetBall();state='ready';}});
+  nextQuestion();
+  document.documentElement.classList.add('game-ready');
+})();
+</script>
+</body>
+</html>
